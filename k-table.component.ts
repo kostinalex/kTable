@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'kTable',
@@ -6,7 +6,11 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./k-table.component.scss'],
 })
 export class KTableComponent implements OnInit {
+  @Input() data: Array<Object>;
+
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    console.log('=====>data', this.data);
+  }
 }
