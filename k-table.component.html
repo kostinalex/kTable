@@ -1,1 +1,120 @@
-<p>k-table works!</p>
+<table style="width: 100%">
+  <tr>
+    <td>
+      <button
+        *ngIf="format && format.navigation"
+        class="btn btn-success"
+        style="margin-bottom: 10px"
+        (click)="click('new')"
+      >
+        Add New
+      </button>
+    </td>
+    <td>
+      <button
+        *ngIf="format && format.refresh != false"
+        class="btn btn-secondary"
+        style="margin-bottom: 10px"
+        (click)="refreshF()"
+      >
+        Refresh
+      </button>
+    </td>
+    <td style="text-align: right">
+      <input
+        type="text"
+        [(ngModel)]="filters.searchWord"
+        class="form-control"
+        style="max-width: 200px; float: right"
+        placeholder="Search"
+      />
+    </td>
+  </tr>
+</table>
+
+<table class="table table-bordered table-hover" style="font-size: 12px">
+  <thead>
+    <tr>
+      <!-- SELECT ALL -->
+      <th *ngIf="format && format.select">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          value=""
+          id="flexCheckChecked"
+          (change)="selectAll($event.target.checked)"
+        />
+      </th>
+      <th
+        style="cursor: pointer"
+        *ngFor="let prop of properties"
+        (click)="sort(prop.id)"
+      >
+        {{ prop.name }}
+      </th>
+      <th *ngIf="format && format.delete">Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr
+      *ngFor="let item of dataSorted"
+      [ngStyle]="{ cursor: format && format.navigation ? 'pointer' : '' }"
+    >
+      <!-- SELECT COLUMN -->
+      <td *ngIf="format && format.select">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          value=""
+          id="flexCheckChecked"
+          [(ngModel)]="item['selected11']"
+          (change)="itemSelectedF()"
+        />
+      </td>
+      <td
+        [ngClass]="prop.number ? 'number' : ''"
+        [ngStyle]="{ width: !prop.width ? '' : prop.width }"
+        *ngFor="let prop of properties"
+        (click)="click(item.item[this.format.navigation.byProperty])"
+      >
+        <!-- NORMAL -->
+        <span *ngIf="!prop.date && !prop.number && !prop.bool">{{
+          item.item[prop.id]
+        }}</span>
+        <!-- DATE -->
+        <span *ngIf="prop.date == true">{{
+          item.item[prop.id]
+            | date : (!prop.dateFormat ? "yyyy-MM-dd" : prop.dateFormat)
+        }}</span>
+        <!-- NUMBER -->
+        <span *ngIf="prop.number == true">{{
+          item.item[prop.id] | number : "1.2-2"
+        }}</span>
+        <!-- BOOL -->
+        <span *ngIf="prop.bool == true">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            value=""
+            id="flexCheckChecked"
+            [checked]="item.item[prop.id]"
+            disabled
+          />
+        </span>
+      </td>
+      <!-- DELETE -->
+      <td *ngIf="format && format.delete" style="text-align: center">
+        <button class="btn btn-danger btn-sm" (click)="deleteItemF(item)">
+          Delete
+        </button>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot *ngIf="format && format.sum">
+    <tr>
+      <th *ngFor="let prop of properties" style="text-align: right">
+        {{ sum(prop.id) | number : "1.2-2" }}
+      </th>
+    </tr>
+  </tfoot>
+</table>
