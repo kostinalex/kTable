@@ -31,6 +31,8 @@ export class KTableComponent implements OnInit {
   itemsPerPage = 30;
   numPerPage = [10, 20, 30, 50];
 
+  showFiltersPopUp = false;
+
   applyFilters = false;
 
   filters = {
@@ -47,6 +49,10 @@ export class KTableComponent implements OnInit {
 
     if (this.format && this.format.itemsPerPage) {
       this.itemsPerPage = this.format.itemsPerPage;
+    }
+
+    if (localStorage.getItem("itemsPerPage")) {
+      this.itemsPerPage = +localStorage.getItem("itemsPerPage");
     }
 
     if (!this.numPerPage.includes(this.itemsPerPage)) {
@@ -250,5 +256,60 @@ export class KTableComponent implements OnInit {
 
   pageChanged(event) {
     this.page = event;
+  }
+
+  itemsPerPageChanged() {
+    localStorage.setItem("itemsPerPage", "" + this.itemsPerPage);
+  }
+
+  removeFilter(fil) {
+    console.log("=====>removeFilter", fil);
+    this.filters[fil] = "";
+  }
+
+  getFilters() {
+    let filters = [];
+    for (let fil in this.filters) {
+      if (this.filters[fil] != "" && fil != "sortToggle") {
+        filters.push(fil);
+      }
+    }
+
+    return filters;
+  }
+
+  getFilterValue(fil) {
+    let result = this.filters[fil];
+
+    if (fil == "searchWord") {
+      result = "Search Word: '" + result + "'";
+    }
+
+    if (fil == "sort") {
+      let propertyName = this.filters[fil];
+
+      let prop = this.properties.find((c) => c.id == propertyName);
+      if (prop) {
+        propertyName = prop.name;
+      }
+
+      result =
+        "Sort by: '" +
+        propertyName +
+        "' " +
+        (this.filters.sortToggle == 1 ? "A-Z" : "Z-A");
+    }
+
+    return result;
+  }
+
+  filtersPopUp() {
+    this.showFiltersPopUp = !this.showFiltersPopUp;
+  }
+
+  getAdditionalFilters() {
+    let additionalFilters = this.properties.filter((c) => c.filter == true);
+
+    return additionalFilters;
   }
 }

@@ -20,8 +20,19 @@
         Refresh
       </button>
     </td>
+    <td>
+      <button
+        *ngIf="getAdditionalFilters() && getAdditionalFilters().length > 0"
+        class="btn btn-info"
+        style="margin-bottom: 10px"
+        (click)="filtersPopUp()"
+      >
+        Filters
+      </button>
+    </td>
     <td style="text-align: right">
       <input
+        *ngIf="format && format.search != false"
         type="text"
         [(ngModel)]="filters.searchWord"
         class="form-control"
@@ -31,6 +42,22 @@
     </td>
   </tr>
 </table>
+
+<div
+  *ngIf="getFilters() && getFilters().length > 0"
+  style="margin-bottom: 10px"
+>
+  <div
+    class="filterWrapper"
+    style="background-color: transparent; margin-right: 20px"
+  >
+    Filters:
+  </div>
+  <div *ngFor="let fil of getFilters()" class="filterWrapper">
+    <div class="spanText">{{ getFilterValue(fil) }}</div>
+    <div class="spanCross" (click)="removeFilter(fil)">X</div>
+  </div>
+</div>
 
 <table class="table table-bordered table-hover" style="font-size: 12px">
   <thead>
@@ -132,7 +159,11 @@
 <table *ngIf="format && format.pagination != false" style="width: 100%">
   <tr>
     <td style="width: 200px">
-      <select class="form-control" [(ngModel)]="itemsPerPage">
+      <select
+        class="form-control"
+        [(ngModel)]="itemsPerPage"
+        (change)="itemsPerPageChanged()"
+      >
         <option *ngFor="let num of numPerPage">{{ num }}</option>
       </select>
     </td>
@@ -144,3 +175,27 @@
     <td style="width: 200px"></td>
   </tr>
 </table>
+<br />
+<br />
+<br />
+
+<!-- FILTERS -->
+<div
+  *ngIf="
+    getAdditionalFilters() &&
+    getAdditionalFilters().length > 0 &&
+    showFiltersPopUp
+  "
+  class="filters-blur"
+>
+  <div class="filtersWrapper">
+    <div class="d-flex flex-row">
+      <div class="p-2">Filters:</div>
+    </div>
+    <div class="d-flex flex-row">
+      <div class="p-2">
+        <button class="btn btn-success" (click)="filtersPopUp()">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>

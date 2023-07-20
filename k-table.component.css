@@ -1,3 +1,49 @@
 .number {
   text-align: right;
 }
+
+.filterWrapper {
+  float: left;
+  padding: 0px 0px 0px 0px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  background-color: rgb(194, 194, 194);
+}
+
+.spanText {
+  float: left;
+  padding: 0px 10px;
+}
+
+.spanCross {
+  float: right;
+  padding: 0px 5px;
+  background-color: gray;
+  cursor: pointer;
+}
+
+.filters-blur {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  background-color: rgba(0, 0, 0, 0.6);
+
+  z-index: 99999;
+}
+
+.filtersWrapper {
+  background-color: white;
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  padding: 30px 20px 10px 20px;
+
+  max-width: 600px;
+
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
