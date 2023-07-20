@@ -57,7 +57,17 @@
   </thead>
   <tbody>
     <tr
-      *ngFor="let item of dataSorted"
+      *ngFor="
+        let item of format && format.pagination == false
+          ? dataSorted
+          : (dataSorted
+            | paginate
+              : {
+                  itemsPerPage: +itemsPerPage,
+                  currentPage: page,
+                  totalItems: dataSorted.length
+                })
+      "
       [ngStyle]="{ cursor: format && format.navigation ? 'pointer' : '' }"
     >
       <!-- SELECT COLUMN -->
@@ -117,4 +127,20 @@
       </th>
     </tr>
   </tfoot>
+</table>
+
+<table *ngIf="format && format.pagination != false" style="width: 100%">
+  <tr>
+    <td style="width: 200px">
+      <select class="form-control" [(ngModel)]="itemsPerPage">
+        <option *ngFor="let num of numPerPage">{{ num }}</option>
+      </select>
+    </td>
+    <td style="text-align: center">
+      <pagination-controls
+        (pageChange)="pageChanged($event)"
+      ></pagination-controls>
+    </td>
+    <td style="width: 200px"></td>
+  </tr>
 </table>

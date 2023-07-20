@@ -27,6 +27,9 @@ export class KTableComponent implements OnInit {
 
   dataSorted;
   properties = [];
+  page = 1;
+  itemsPerPage = 30;
+  numPerPage = [10, 20, 30, 50];
 
   applyFilters = false;
 
@@ -41,6 +44,16 @@ export class KTableComponent implements OnInit {
   ngOnInit(): void {
     this.getProperties();
     this.filtersDiffer = this.differs.find(this.filters).create();
+
+    if (this.format && this.format.itemsPerPage) {
+      this.itemsPerPage = this.format.itemsPerPage;
+    }
+
+    if (!this.numPerPage.includes(this.itemsPerPage)) {
+      this.numPerPage.push(this.itemsPerPage);
+    }
+
+    this.numPerPage = this.numPerPage.sort((a, b) => (a > b ? 1 : -1));
 
     setTimeout(() => {
       this.applyFilters = true;
@@ -139,7 +152,7 @@ export class KTableComponent implements OnInit {
   }
 
   itemSelectedF() {
-    let selectedItems = this.data.filter((c) => c["selected11"] == true);
+    let selectedItems = this.dataSorted.filter((c) => c["selected11"] == true);
 
     this.itemSelected.emit(selectedItems.map((c) => c["item"]));
   }
@@ -233,5 +246,9 @@ export class KTableComponent implements OnInit {
 
   refreshF() {
     this.refresh.emit("refresh");
+  }
+
+  pageChanged(event) {
+    this.page = event;
   }
 }
