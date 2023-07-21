@@ -22,28 +22,54 @@
   cursor: pointer;
 }
 
-.filters-blur {
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
-  top: 0px;
-  right: 0px;
-  background-color: rgba(0, 0, 0, 0.6);
+.headerText {
+  cursor: pointer;
+  float: left;
 
-  z-index: 99999;
+  height: 100%;
+  padding: 9px 10px;
+  width: 100%;
 }
 
-.filtersWrapper {
-  background-color: white;
+.filterDiv {
+  cursor: pointer;
+
+  height: 15px;
 
   position: absolute;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  padding: 30px 20px 10px 20px;
+  top: 13px;
+  right: 5px;
+  z-index: 1000;
+  width: 20px;
 
-  max-width: 600px;
+  background-image: url("https://downloads.kelectronics.net/images/filter.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
 
+.filterDiv:hover,
+.headerText:hover {
+  color: red;
+}
+
+.filterDiv:hover .filterDrop {
+  display: block;
+  color: black;
+}
+
+.filterDrop {
+  position: absolute;
+  background-color: white;
+  top: 12px;
+  right: 0px;
+  width: 200px;
+  border: 1px solid rgb(234, 234, 234);
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  z-index: 3;
+  display: none;
+}
+
+.optionDivWrapper:hover {
+  background-color: red;
 }

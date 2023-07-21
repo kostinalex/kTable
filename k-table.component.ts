@@ -23,17 +23,11 @@ export class KTableComponent implements OnInit {
   @Output() deleteItem = new EventEmitter<any>();
   @Output() refresh = new EventEmitter<any>();
 
-  private filtersDiffer;
-
   dataSorted;
   properties = [];
   page = 1;
   itemsPerPage = 30;
   numPerPage = [10, 20, 30, 50];
-
-  showFiltersPopUp = false;
-
-  applyFilters = false;
 
   filters = {
     sort: "",
@@ -45,7 +39,6 @@ export class KTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.getProperties();
-    this.filtersDiffer = this.differs.find(this.filters).create();
 
     if (this.format && this.format.itemsPerPage) {
       this.itemsPerPage = this.format.itemsPerPage;
@@ -61,16 +54,7 @@ export class KTableComponent implements OnInit {
 
     this.numPerPage = this.numPerPage.sort((a, b) => (a > b ? 1 : -1));
 
-    setTimeout(() => {
-      this.applyFilters = true;
-    }, 100);
-  }
-
-  ngDoCheck(): void {
-    const changes = this.filtersDiffer.diff(this.filters);
-    if (changes) {
-      this.filtersChanged();
-    }
+    this.getInitialOptions();
   }
 
   getProperties() {
@@ -147,7 +131,7 @@ export class KTableComponent implements OnInit {
 
     this.dataSorted = JSON.parse(JSON.stringify(this.data));
 
-    console.log("====>this.properties", this.properties);
+    console.log("====>this.filters", this.filters);
   }
 
   selectAll(value) {
@@ -176,19 +160,36 @@ export class KTableComponent implements OnInit {
   sort(propertyId) {
     this.filters.sortToggle = -this.filters.sortToggle;
     this.filters.sort = propertyId;
+    this.filtersChanged();
   }
 
   filtersChanged() {
     console.log("====>filtersChanged()", this.filters);
-    console.log("====>this.data", this.data);
-
-    if (this.applyFilters == false) {
-      return;
-    }
 
     this.dataSorted = JSON.parse(JSON.stringify(this.data));
 
-    //filters
+    //options
+
+    for (let fil in this.filters) {
+      if (
+        fil != "sortToggle" &&
+        fil != "searchWord" &&
+        fil != "sort" &&
+        this.filters[fil] &&
+        this.filters[fil].options &&
+        this.filters[fil].options.length > 0
+      ) {
+        let notSelected = this.filters[fil].options
+          .filter((c) => c.selected == false)
+          .map((c) => c.value);
+
+        if (notSelected.length > 0) {
+          this.dataSorted = this.dataSorted.filter(
+            (c) => !notSelected.includes(c.item[fil])
+          );
+        }
+      }
+    }
 
     //search
     if (this.filters.searchWord != "") {
@@ -210,7 +211,21 @@ export class KTableComponent implements OnInit {
       );
     }
 
-    console.log("====>this.dataSorted", this.dataSorted);
+    //remaining options detect
+
+    // console.log("====>this.dataSorted", this.dataSorted);
+  }
+
+  getInitialOptions() {
+    //filters remaining
+    for (let prop of this.properties) {
+      if (prop.filter) {
+        this.filters[prop.id] = {};
+        this.filters[prop.id].options = [
+          ...new Set(this.dataSorted.map((c) => c["item"][prop.id])),
+        ].map((c) => ({ selected: true, value: c }));
+      }
+    }
   }
 
   makeHeader(str: string) {
@@ -263,17 +278,49 @@ export class KTableComponent implements OnInit {
   }
 
   removeFilter(fil) {
-    console.log("=====>removeFilter", fil);
-    this.filters[fil] = "";
+    if (fil != "sortToggle" && fil != "searchWord" && fil != "sort") {
+      //options
+      if (
+        this.filters[fil].options &&
+        this.filters[fil].options.filter((c) => c.selected == false).length > 0
+      ) {
+        for (let option of this.filters[fil].options) {
+          option.selected = true;
+        }
+      }
+      //others
+    } else {
+      this.filters[fil] = "";
+    }
+    this.filtersChanged();
   }
 
   getFilters() {
     let filters = [];
     for (let fil in this.filters) {
-      if (this.filters[fil] != "" && fil != "sortToggle") {
+      if (fil == "sort" && this.filters.sort != "") {
+        filters.push(fil);
+      } else if (fil == "searchWord" && this.filters.searchWord != "") {
         filters.push(fil);
       }
+      // filters by property
+      else if (fil != "sortToggle" && fil != "searchWord" && fil != "sort") {
+        if (
+          this.filters[fil] &&
+          this.filters[fil].options &&
+          this.filters[fil].options.length > 0
+        ) {
+          if (
+            this.filters[fil].options.filter((c) => c.selected == false)
+              .length > 0
+          ) {
+            filters.push(fil);
+          }
+        }
+      }
     }
+
+    // console.log("====>filters", filters);
 
     return filters;
   }
@@ -281,35 +328,33 @@ export class KTableComponent implements OnInit {
   getFilterValue(fil) {
     let result = this.filters[fil];
 
-    if (fil == "searchWord") {
-      result = "Search Word: '" + result + "'";
+    let propertyName = this.filters[fil];
+
+    let prop = this.properties.find((c) => c.id == propertyName);
+    if (prop) {
+      propertyName = prop.name;
     }
 
-    if (fil == "sort") {
-      let propertyName = this.filters[fil];
-
-      let prop = this.properties.find((c) => c.id == propertyName);
-      if (prop) {
-        propertyName = prop.name;
-      }
-
+    if (fil == "searchWord") {
+      result = "Search Word: '" + result + "'";
+    } else if (fil == "sort") {
       result =
         "Sort by: '" +
         propertyName +
         "' " +
         (this.filters.sortToggle == 1 ? "A-Z" : "Z-A");
     }
+    //not selected options
+    else if (
+      this.filters[fil] &&
+      this.filters[fil].options &&
+      this.filters[fil].options.filter((c) => c.selected == false).length > 0
+    ) {
+      result = `Not all options selected for '${
+        this.properties.find((c) => c.id == fil)?.name
+      }'`;
+    }
 
     return result;
-  }
-
-  filtersPopUp() {
-    this.showFiltersPopUp = !this.showFiltersPopUp;
-  }
-
-  getAdditionalFilters() {
-    let additionalFilters = this.properties.filter((c) => c.filter == true);
-
-    return additionalFilters;
   }
 }

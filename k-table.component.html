@@ -1,3 +1,4 @@
+<!-- BUTTON -->
 <table style="width: 100%">
   <tr>
     <td>
@@ -20,16 +21,7 @@
         Refresh
       </button>
     </td>
-    <td>
-      <button
-        *ngIf="getAdditionalFilters() && getAdditionalFilters().length > 0"
-        class="btn btn-info"
-        style="margin-bottom: 10px"
-        (click)="filtersPopUp()"
-      >
-        Filters
-      </button>
-    </td>
+
     <td style="text-align: right">
       <input
         *ngIf="format && format.search != false"
@@ -38,11 +30,13 @@
         class="form-control"
         style="max-width: 200px; float: right"
         placeholder="Search"
+        (keyup)="filtersChanged()"
       />
     </td>
   </tr>
 </table>
 
+<!-- FILTERS -->
 <div
   *ngIf="getFilters() && getFilters().length > 0"
   style="margin-bottom: 10px"
@@ -59,6 +53,7 @@
   </div>
 </div>
 
+<!-- TABLE -->
 <table class="table table-bordered table-hover" style="font-size: 12px">
   <thead>
     <tr>
@@ -73,11 +68,38 @@
         />
       </th>
       <th
-        style="cursor: pointer"
         *ngFor="let prop of properties"
-        (click)="sort(prop.id)"
+        style="padding: 0px; position: relative"
       >
-        {{ prop.name }}
+        <div class="headerText" (click)="sort(prop.id)">{{ prop.name }}</div>
+
+        <div
+          *ngIf="
+            prop.filter == true &&
+            this.filters[prop.id] &&
+            this.filters[prop.id].options &&
+            this.filters[prop.id].options.length > 0
+          "
+          class="filterDiv"
+        >
+          <div class="filterDrop">
+            <div
+              *ngFor="let option of this.filters[prop.id].options"
+              class="optionDivWrapper"
+            >
+              <input
+                class="form-check-input"
+                type="checkbox"
+                value=""
+                id="flexCheckChecked"
+                [(ngModel)]="option.selected"
+                (change)="filtersChanged()"
+              />
+
+              {{ option.value }}
+            </div>
+          </div>
+        </div>
       </th>
       <th *ngIf="format && format.delete">Delete</th>
     </tr>
@@ -178,24 +200,3 @@
 <br />
 <br />
 <br />
-
-<!-- FILTERS -->
-<div
-  *ngIf="
-    getAdditionalFilters() &&
-    getAdditionalFilters().length > 0 &&
-    showFiltersPopUp
-  "
-  class="filters-blur"
->
-  <div class="filtersWrapper">
-    <div class="d-flex flex-row">
-      <div class="p-2">Filters:</div>
-    </div>
-    <div class="d-flex flex-row">
-      <div class="p-2">
-        <button class="btn btn-success" (click)="filtersPopUp()">Apply</button>
-      </div>
-    </div>
-  </div>
-</div>
