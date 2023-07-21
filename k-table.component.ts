@@ -1,10 +1,13 @@
+import { formatDate, formatNumber } from "@angular/common";
 import {
   Component,
   EventEmitter,
+  Inject,
   Input,
   IterableDiffers,
   KeyValueDiffer,
   KeyValueDiffers,
+  LOCALE_ID,
   OnInit,
   Output,
 } from "@angular/core";
@@ -34,6 +37,8 @@ export class KTableComponent implements OnInit {
     sortToggle: 1,
     searchWord: "",
   };
+
+  showFiltersForProp = "";
 
   constructor(private router: Router, private differs: KeyValueDiffers) {}
 
@@ -133,13 +138,18 @@ export class KTableComponent implements OnInit {
         if (this.filters[prop.id] == undefined) {
           this.filters[prop.id] = {};
         }
+        this.filters[prop.id].from = "";
+        this.filters[prop.id].to = "";
+
         this.filters[prop.id].selectAll = true;
         this.filters[prop.id].options = [
           ...new Set(this.data.map((c) => c["item"][prop.id])),
-        ].map((c) => ({
-          selected: true,
-          value: c,
-        }));
+        ]
+          .sort((a, b) => (a > b ? 1 : -1))
+          .map((c) => ({
+            selected: true,
+            value: c,
+          }));
       }
     }
 
@@ -170,10 +180,52 @@ export class KTableComponent implements OnInit {
           .filter((c) => c.selected == false)
           .map((c) => c.value);
 
+        console.log("====>notSelected", notSelected);
+
         if (notSelected.length > 0) {
           this.dataSorted = this.dataSorted.filter(
             (c) => !notSelected.includes(c.item[fil])
           );
+        }
+
+        //from to
+
+        if (this.filters[fil].from != "") {
+          let apply = this.filters[fil].from;
+          let specificProperty = this.properties.find((c) => c.id == fil);
+
+          if (specificProperty.number) {
+            apply = +apply;
+            this.dataSorted = this.dataSorted.filter(
+              (c) => +c.item[fil] >= apply
+            );
+          }
+
+          if (specificProperty.date) {
+            apply = new Date(apply);
+            this.dataSorted = this.dataSorted.filter(
+              (c) => new Date(c.item[fil]) >= apply
+            );
+          }
+        }
+
+        if (this.filters[fil].to != "") {
+          let apply = this.filters[fil].to;
+          let specificProperty = this.properties.find((c) => c.id == fil);
+
+          if (specificProperty.number) {
+            apply = +apply;
+            this.dataSorted = this.dataSorted.filter(
+              (c) => +c.item[fil] <= apply
+            );
+          }
+
+          if (specificProperty.date) {
+            apply = new Date(apply);
+            this.dataSorted = this.dataSorted.filter(
+              (c) => new Date(c.item[fil]) <= apply
+            );
+          }
         }
       }
     }
@@ -213,8 +265,19 @@ export class KTableComponent implements OnInit {
         }
         this.filters[fil].selectAll = true;
       }
-      //others
-    } else {
+
+      //from to
+
+      if (this.filters[fil].from != "") {
+        this.filters[fil].from = "";
+      }
+
+      if (this.filters[fil].to != "") {
+        this.filters[fil].to = "";
+      }
+    }
+    //others
+    else {
       this.filters[fil] = "";
     }
     this.filtersChanged();
@@ -241,6 +304,13 @@ export class KTableComponent implements OnInit {
           ) {
             filters.push(fil);
           }
+        }
+
+        if (
+          this.filters[fil] &&
+          (this.filters[fil].from != "" || this.filters[fil].to != "")
+        ) {
+          filters.push(fil);
         }
       }
     }
@@ -278,6 +348,13 @@ export class KTableComponent implements OnInit {
       result = `Not all options selected for '${
         this.properties.find((c) => c.id == fil)?.name
       }'`;
+    } else if (
+      this.filters[fil] &&
+      (this.filters[fil].from != "" || this.filters[fil].to != "")
+    ) {
+      result = `Column '${this.properties.find((c) => c.id == fil)?.name}'${
+        this.filters[fil].from != "" ? ` from '${this.filters[fil].from}'` : ""
+      }${this.filters[fil].to != "" ? ` to '${this.filters[fil].to}'` : ""}`;
     }
 
     return result;
@@ -298,6 +375,17 @@ export class KTableComponent implements OnInit {
     }
 
     this.filtersChanged();
+  }
+
+  filtersClickShowDropDown(propId, className) {
+    if (className == "filterDiv") {
+      if (this.showFiltersForProp == "") {
+        this.showFiltersForProp = propId;
+      } else {
+        this.showFiltersForProp = "";
+      }
+      this.filtersChanged();
+    }
   }
 
   //#endregion

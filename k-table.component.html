@@ -76,8 +76,36 @@
         <div
           *ngIf="prop.filter == true && this.filters[prop.id]"
           class="filterDiv"
+          (click)="filtersClickShowDropDown(prop.id, $event.target.className)"
         >
-          <div class="filterDrop">
+          <div *ngIf="showFiltersForProp == prop.id" class="filterDrop">
+            <div
+              *ngIf="prop.number == true || prop.date == true"
+              style="margin-bottom: 5px"
+            >
+              From
+              <input
+                name="username"
+                [type]="
+                  prop.number ? 'number' : prop.date ? 'datetime-local' : 'text'
+                "
+                class="smallInput"
+                [(ngModel)]="this.filters[prop.id].from"
+              />
+            </div>
+            <div *ngIf="prop.number == true || prop.date == true">
+              To
+              <input
+                name="username"
+                [type]="
+                  prop.number ? 'number' : prop.date ? 'datetime-local' : 'text'
+                "
+                class="smallInput"
+                style="margin-left: 20px"
+                [(ngModel)]="this.filters[prop.id].to"
+              />
+            </div>
+            <hr style="margin: 5px 0px" />
             <div class="optionDivWrapper">
               <input
                 class="form-check-input"
@@ -93,16 +121,24 @@
               class="optionDivWrapper"
               (click)="optionCheckboxClicked(prop.id, option.value)"
             >
-              <input
-                class="form-check-input"
-                type="checkbox"
-                value=""
-                id="flexCheckChecked"
-                [(ngModel)]="option.selected"
-                (change)="filtersChanged()"
-              />
-
-              {{ option.value }}
+              <div class="checkboxOptionDiv">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  value=""
+                  id="flexCheckChecked"
+                  [(ngModel)]="option.selected"
+                />
+              </div>
+              <div [ngStyle]="{ 'text-align': prop.number ? 'right' : 'left' }">
+                {{
+                  prop.number
+                    ? (option.value | number : "1.2-2")
+                    : prop.date
+                    ? (option.value | date : "yyyy-MM-dd")
+                    : option.value
+                }}
+              </div>
             </div>
           </div>
         </div>
