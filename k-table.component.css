@@ -67,9 +67,12 @@
   border: 1px solid rgb(234, 234, 234);
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   z-index: 3;
-  display: none;
+  /* display: none; */
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 5px 10px 5px 10px;
 }
 
 .optionDivWrapper:hover {
-  background-color: red;
+  background-color: rgb(193, 193, 193);
 }

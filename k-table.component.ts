@@ -53,8 +53,6 @@ export class KTableComponent implements OnInit {
     }
 
     this.numPerPage = this.numPerPage.sort((a, b) => (a > b ? 1 : -1));
-
-    this.getInitialOptions();
   }
 
   getProperties() {
@@ -129,39 +127,28 @@ export class KTableComponent implements OnInit {
       }
     }
 
+    //create options
+    for (let prop of this.properties) {
+      if (prop.filter) {
+        if (this.filters[prop.id] == undefined) {
+          this.filters[prop.id] = {};
+        }
+        this.filters[prop.id].selectAll = true;
+        this.filters[prop.id].options = [
+          ...new Set(this.data.map((c) => c["item"][prop.id])),
+        ].map((c) => ({
+          selected: true,
+          value: c,
+        }));
+      }
+    }
+
     this.dataSorted = JSON.parse(JSON.stringify(this.data));
 
     console.log("====>this.filters", this.filters);
   }
 
-  selectAll(value) {
-    for (let item of this.data) {
-      item["selected11"] = value;
-    }
-    this.itemSelectedF();
-  }
-
-  itemSelectedF() {
-    let selectedItems = this.dataSorted.filter((c) => c["selected11"] == true);
-
-    this.itemSelected.emit(selectedItems.map((c) => c["item"]));
-  }
-
-  deleteItemF(item) {
-    this.deleteItem.emit(item.item);
-  }
-
-  click(id) {
-    if (this.format && this.format.navigation) {
-      this.router.navigate([this.format.navigation.url, id]);
-    }
-  }
-
-  sort(propertyId) {
-    this.filters.sortToggle = -this.filters.sortToggle;
-    this.filters.sort = propertyId;
-    this.filtersChanged();
-  }
+  //#region FILTERS
 
   filtersChanged() {
     console.log("====>filtersChanged()", this.filters);
@@ -211,70 +198,7 @@ export class KTableComponent implements OnInit {
       );
     }
 
-    //remaining options detect
-
     // console.log("====>this.dataSorted", this.dataSorted);
-  }
-
-  getInitialOptions() {
-    //filters remaining
-    for (let prop of this.properties) {
-      if (prop.filter) {
-        this.filters[prop.id] = {};
-        this.filters[prop.id].options = [
-          ...new Set(this.dataSorted.map((c) => c["item"][prop.id])),
-        ].map((c) => ({ selected: true, value: c }));
-      }
-    }
-  }
-
-  makeHeader(str: string) {
-    var result = "";
-
-    for (var i = 0; i < str.length; i++) {
-      var character = "" + str.charAt(i);
-      if (character.toUpperCase() == character) {
-        result = result + " " + character;
-      } else {
-        result = result + character;
-      }
-    }
-
-    return this.capitalizeFirstLetter(result);
-  }
-
-  capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
-
-  sum(propId) {
-    let sum = undefined;
-
-    if (
-      this.format &&
-      this.format.sum &&
-      this.format.sum.length > 0 &&
-      this.format.sum.includes(propId)
-    ) {
-      sum = 0;
-      for (let item of this.dataSorted) {
-        sum = sum + +item.item[propId];
-      }
-    }
-
-    return sum;
-  }
-
-  refreshF() {
-    this.refresh.emit("refresh");
-  }
-
-  pageChanged(event) {
-    this.page = event;
-  }
-
-  itemsPerPageChanged() {
-    localStorage.setItem("itemsPerPage", "" + this.itemsPerPage);
   }
 
   removeFilter(fil) {
@@ -287,6 +211,7 @@ export class KTableComponent implements OnInit {
         for (let option of this.filters[fil].options) {
           option.selected = true;
         }
+        this.filters[fil].selectAll = true;
       }
       //others
     } else {
@@ -356,5 +281,102 @@ export class KTableComponent implements OnInit {
     }
 
     return result;
+  }
+
+  optionCheckboxClicked(filtersProp, optionValue) {
+    let changedOption = this.filters[filtersProp].options.find(
+      (c) => c.value == optionValue
+    );
+
+    changedOption.selected = !changedOption.selected;
+    this.filtersChanged();
+  }
+
+  selectAllOptions(filtersProp) {
+    for (let option of this.filters[filtersProp].options) {
+      option.selected = this.filters[filtersProp].selectAll;
+    }
+
+    this.filtersChanged();
+  }
+
+  //#endregion
+
+  makeHeader(str: string) {
+    var result = "";
+
+    for (var i = 0; i < str.length; i++) {
+      var character = "" + str.charAt(i);
+      if (character.toUpperCase() == character) {
+        result = result + " " + character;
+      } else {
+        result = result + character;
+      }
+    }
+
+    return this.capitalizeFirstLetter(result);
+  }
+
+  capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  sum(propId) {
+    let sum = undefined;
+
+    if (
+      this.format &&
+      this.format.sum &&
+      this.format.sum.length > 0 &&
+      this.format.sum.includes(propId)
+    ) {
+      sum = 0;
+      for (let item of this.dataSorted) {
+        sum = sum + +item.item[propId];
+      }
+    }
+
+    return sum;
+  }
+
+  refreshF() {
+    this.refresh.emit("refresh");
+  }
+
+  pageChanged(event) {
+    this.page = event;
+  }
+
+  itemsPerPageChanged() {
+    localStorage.setItem("itemsPerPage", "" + this.itemsPerPage);
+  }
+
+  selectAll(value) {
+    for (let item of this.data) {
+      item["selected11"] = value;
+    }
+    this.itemSelectedF();
+  }
+
+  itemSelectedF() {
+    let selectedItems = this.dataSorted.filter((c) => c["selected11"] == true);
+
+    this.itemSelected.emit(selectedItems.map((c) => c["item"]));
+  }
+
+  deleteItemF(item) {
+    this.deleteItem.emit(item.item);
+  }
+
+  click(id) {
+    if (this.format && this.format.navigation) {
+      this.router.navigate([this.format.navigation.url, id]);
+    }
+  }
+
+  sort(propertyId) {
+    this.filters.sortToggle = -this.filters.sortToggle;
+    this.filters.sort = propertyId;
+    this.filtersChanged();
   }
 }

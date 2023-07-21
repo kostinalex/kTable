@@ -74,18 +74,24 @@
         <div class="headerText" (click)="sort(prop.id)">{{ prop.name }}</div>
 
         <div
-          *ngIf="
-            prop.filter == true &&
-            this.filters[prop.id] &&
-            this.filters[prop.id].options &&
-            this.filters[prop.id].options.length > 0
-          "
+          *ngIf="prop.filter == true && this.filters[prop.id]"
           class="filterDiv"
         >
           <div class="filterDrop">
+            <div class="optionDivWrapper">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="flexCheckChecked"
+                [(ngModel)]="this.filters[prop.id].selectAll"
+                (change)="selectAllOptions(prop.id)"
+              />
+              All
+            </div>
             <div
               *ngFor="let option of this.filters[prop.id].options"
               class="optionDivWrapper"
+              (click)="optionCheckboxClicked(prop.id, option.value)"
             >
               <input
                 class="form-check-input"
