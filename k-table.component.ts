@@ -180,8 +180,6 @@ export class KTableComponent implements OnInit {
           .filter((c) => c.selected == false)
           .map((c) => c.value);
 
-        console.log("====>notSelected", notSelected);
-
         if (notSelected.length > 0) {
           this.dataSorted = this.dataSorted.filter(
             (c) => !notSelected.includes(c.item[fil])
@@ -315,6 +313,8 @@ export class KTableComponent implements OnInit {
       }
     }
 
+    filters = [...new Set(filters)];
+
     // console.log("====>filters", filters);
 
     return filters;
@@ -338,23 +338,29 @@ export class KTableComponent implements OnInit {
         propertyName +
         "' " +
         (this.filters.sortToggle == 1 ? "A-Z" : "Z-A");
-    }
-    //not selected options
-    else if (
-      this.filters[fil] &&
-      this.filters[fil].options &&
-      this.filters[fil].options.filter((c) => c.selected == false).length > 0
-    ) {
-      result = `Not all options selected for '${
-        this.properties.find((c) => c.id == fil)?.name
-      }'`;
-    } else if (
-      this.filters[fil] &&
-      (this.filters[fil].from != "" || this.filters[fil].to != "")
-    ) {
-      result = `Column '${this.properties.find((c) => c.id == fil)?.name}'${
-        this.filters[fil].from != "" ? ` from '${this.filters[fil].from}'` : ""
-      }${this.filters[fil].to != "" ? ` to '${this.filters[fil].to}'` : ""}`;
+    } else if (this.filters[fil]) {
+      result = "";
+
+      if (this.filters[fil].from != "" || this.filters[fil].to != "") {
+        result = `Column '${this.properties.find((c) => c.id == fil)?.name}'${
+          this.filters[fil].from != ""
+            ? ` from '${this.filters[fil].from}'`
+            : ""
+        }${this.filters[fil].to != "" ? ` to '${this.filters[fil].to}'` : ""}`;
+      }
+
+      //not selected options
+
+      if (
+        this.filters[fil].options &&
+        this.filters[fil].options.filter((c) => c.selected == false).length > 0
+      ) {
+        result =
+          (result != "" ? result + ". " : "") +
+          `Not all options selected for '${
+            this.properties.find((c) => c.id == fil)?.name
+          }'`;
+      }
     }
 
     return result;
