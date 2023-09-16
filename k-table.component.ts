@@ -155,13 +155,13 @@ export class KTableComponent implements OnInit {
 
     this.dataSorted = JSON.parse(JSON.stringify(this.data));
 
-    console.log("====>this.filters", this.filters);
+    // console.log("====>this.filters", this.filters);
   }
 
   //#region FILTERS
 
   filtersChanged() {
-    console.log("====>filtersChanged()", this.filters);
+    // console.log("====>filtersChanged()", this.filters);
 
     this.dataSorted = JSON.parse(JSON.stringify(this.data));
 
