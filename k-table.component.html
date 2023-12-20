@@ -135,7 +135,11 @@
                   prop.number
                     ? (option.value | number : "1.2-2")
                     : prop.date
-                    ? (option.value | date : "yyyy-MM-dd")
+                    ? (option.value
+                      | date
+                        : (prop.dateFormat == undefined
+                            ? "yyyy-MM-dd"
+                            : prop.dateFormat))
                     : option.value
                 }}
               </div>

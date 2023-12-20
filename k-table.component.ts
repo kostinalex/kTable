@@ -2,6 +2,7 @@ import { formatDate, formatNumber } from "@angular/common";
 import {
   Component,
   EventEmitter,
+  HostListener,
   Inject,
   Input,
   IterableDiffers,
@@ -39,6 +40,16 @@ export class KTableComponent implements OnInit {
   };
 
   showFiltersForProp = "";
+
+  @HostListener("window:click", ["$event"])
+  clickEvent(event: KeyboardEvent) {
+    let elem = event.target as HTMLElement;
+
+    // console.log("===>event", elem.className);
+    // if (elem.className != "filterDiv") {
+    //   this.showFiltersForProp = "";
+    // }
+  }
 
   constructor(private router: Router, private differs: KeyValueDiffers) {}
 
@@ -446,7 +457,7 @@ export class KTableComponent implements OnInit {
   }
 
   selectAll(value) {
-    for (let item of this.data) {
+    for (let item of this.dataSorted) {
       item["selected11"] = value;
     }
     this.itemSelectedF();
