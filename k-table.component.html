@@ -180,7 +180,7 @@
         [ngClass]="prop.number ? 'number' : ''"
         [ngStyle]="{ width: !prop.width ? '' : prop.width }"
         *ngFor="let prop of properties"
-        (click)="click(item.item[this.format.navigation.byProperty])"
+        (click)="click(item.item[this.format.navigation?.byProperty])"
       >
         <!-- NORMAL -->
         <span *ngIf="!prop.date && !prop.number && !prop.bool">{{
